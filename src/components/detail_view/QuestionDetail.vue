@@ -17,7 +17,7 @@
             <span class="media-contain is-edit">编辑</span>
           </router-link>
         </span>
-        <hr  />
+        <hr />
         <div
           class="col-lg-12 col-md-12 col-sm-12 col-xs-12"
           style="margin-bottom:70px"
@@ -56,15 +56,16 @@
           <span style="margin-right:15px">全部评论</span>
           <em>{{question.commentCount}}</em>
         </div>
-        <hr  />
+        <hr />
+        <!-- 一级评论展示 -->
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-          <div class="media" v-for="comment in question.questionCommentList" :key="comment.id">
-            <a href>
+          <div class="media" v-for="comment in level1Comments" :key="comment.id">
+            <a href v-if="comment.user">
               <img :src="comment.user.avatar" class="ml-3 mr-3 avatar" alt="head portrait" />
             </a>
             <div class="media-body">
               <span class="comment-nickname">
-                <a href="#">{{ comment.user.nickname}}</a>&nbsp;&nbsp;:&nbsp;
+                <a href="#" v-if="comment.user">{{ comment.user.nickname}}</a>&nbsp;&nbsp;:&nbsp;
               </span>
               <span class="comment-content">{{comment.content}}</span>
               <br />
@@ -101,7 +102,12 @@
           </div>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 offset-5 more-comment">
-          <a href="javascript:void(0)" style="color:#f37327">查看更多评论</a>
+          <a
+            href="javascript:void(0)"
+            style="color:#f37327"
+            @click="changeLevel1CommentPage()"
+            v-if="isShowMoreComment"
+          >查看更多评论</a>
         </div>
       </div>
 
@@ -112,13 +118,14 @@
             <img class="avatar1 mr-3" :src="question.user.avatar" />
           </a>
           <div class="media-body mt-2">
-            <h6 >
+            <h6>
               <a href="#" style="color:#444">{{question.user.nickname}}</a>
             </h6>
-            <a href="">
+            <a href>
               <span style="font-size:12px; color:blue">Ta的个人主页></span>
             </a>
-            <span style="font-size:14px;" class="ml-3">粉丝：</span><em>{{question.user.fanscount}}</em>
+            <span style="font-size:14px;" class="ml-3">粉丝：</span>
+            <em>{{question.user.fanscount}}</em>
           </div>
         </div>
         <hr class="ml-2" />
@@ -144,9 +151,15 @@ export default {
   data() {
     return {
       questionId: "",
-      question: "", // 问题
+      question: {
+        user: {}
+      }, // 问题
       userId: "", // 用户ID
-      isShowReply: false // 控制是否显示和默认不显示
+      isShowReply: false, // 控制是否显示和默认不显示
+      isShowMoreComment: "", // 控制是否显示 “查看更多评论”
+      level1Comments: [], // 一级评论
+      level1CommentsPage: 0, // 控制一级评论的分页
+      commentCount: 0 // 一级评论总数
     };
   },
   created: function() {
@@ -154,9 +167,26 @@ export default {
     this.userId = sessionStorage.getItem("userId");
     that.questionId = this.$route.params.id;
     this.$requestApi.get("question/" + that.questionId, {}, function(res) {
-      console.log(res);
-      that.question = res.data.data;
+      that.question = res.data.data.question;
+      that.commentCount = res.data.data.commentCount;
     });
+    this.$requestApi.get(
+      "comment/find/" + that.level1CommentsPage,
+      {
+        type: 1,
+        parentId: that.questionId
+      },
+      function(response) {
+        that.level1Comments = response.data.data;
+      }
+    );
+  },
+  updated: function() {
+    if (this.level1Comments.length < this.commentCount) {
+      this.isShowMoreComment = true;
+    } else {
+      this.isShowMoreComment = false;
+    }
   },
   methods: {
     isShowComment: function() {
@@ -167,6 +197,23 @@ export default {
     },
     hideReply: function(commentId) {
       hideReply(commentId);
+    },
+    // 改变一级评论页码数和追加数据
+    changeLevel1CommentPage: function() {
+      this.level1CommentsPage += 1;
+      let that = this;
+      this.$requestApi.get(
+        "comment/find/" + that.level1CommentsPage,
+        {
+          type: 1,
+          parentId: that.questionId
+        },
+        function(response) {
+          response.data.data.forEach((item, index) => {
+            that.level1Comments.push(item);
+          });
+        }
+      );
     }
   },
   filters: {
@@ -174,6 +221,15 @@ export default {
       var date = new Date(time);
       return formatDate(date, "yyyy-MM-dd hh:mm:ss");
     }
+  },
+  watch: {
+    // level1Comments:function(){
+    //   if (this.level1Comments.length<this.commentCount) {
+    //     this.isShowMoreComment=true;
+    //   }else{
+    //     this.isShowMoreComment = false;
+    //   }
+    // }
   }
 };
 </script>

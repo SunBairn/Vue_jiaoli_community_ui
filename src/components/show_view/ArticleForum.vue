@@ -18,7 +18,7 @@
           •
           <span>{{article.user.nickname}}</span> 发布&nbsp;&nbsp;
           •
-          <span>{{article.commentCount}}</span> 个回复
+          <span>{{article.commentCount}}</span> 个评论
           •
           <span>{{article.viewCount}}</span> 次浏览
           •

@@ -22,7 +22,7 @@
           •
           <span>{{question.user.nickname}}</span> 发布&nbsp;&nbsp;
           •
-          <span>{{question.commentCount}}</span> 个回复
+          <span>{{question.commentCount}}</span> 个评论
           •
           <span>{{question.viewCount}}</span> 次浏览
           •

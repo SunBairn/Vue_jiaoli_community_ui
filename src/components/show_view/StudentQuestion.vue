@@ -10,7 +10,7 @@
       />
       <div class="media-body">
         <h6 class="mt-0">
-          <a href="#">{{ question.title | titleEllipsis}}</a>
+          <router-link :to="{path:`/question/${question.id}`}"><a href="javascript:void(0)">{{ question.title | titleEllipsis}}</a></router-link>
         </h6>
         <span class="contain-font-size">{{ question.content | ellipsis }}</span>
         <br />
