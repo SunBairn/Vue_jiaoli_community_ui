@@ -84,44 +84,44 @@ export default {
   computed: {
     activename: function() {
       let routeParm = this.$route.params.name;
-      if (routeParm == "one") {
+      if (routeParm == "life") {
         return "校园生活";
       }
-      if (routeParm == "two") {
+      if (routeParm == "question") {
         return "新生问答";
       }
-      if (routeParm == "three") {
+      if (routeParm == "activity") {
         return "校园活动";
       }
-      if (routeParm == "four") {
+      if (routeParm == "article") {
         return "考研论坛";
       }
-      if (routeParm == "five") {
+      if (routeParm == "recruit") {
         return "招聘求职";
       }
-      if (routeParm == "six") {
+      if (routeParm == "notice") {
         return "站内公告";
       }
       return "校园生活";
     },
     currentView: function() {
       let routeParm = this.$route.params.name;
-      if (routeParm == "one") {
+      if (routeParm == "life") {
         return this.componentsArry[0];
       }
-      if (routeParm == "two") {
+      if (routeParm == "question") {
         return this.componentsArry[1];
       }
-      if (routeParm == "three") {
+      if (routeParm == "activity") {
         return this.componentsArry[2];
       }
-      if (routeParm == "four") {
+      if (routeParm == "article") {
         return this.componentsArry[3];
       }
-      if (routeParm == "five") {
+      if (routeParm == "recruit") {
         return this.componentsArry[4];
       }
-      if (routeParm == "six") {
+      if (routeParm == "notice") {
         return this.componentsArry[5];
       }
       return this.componentsArry[0];

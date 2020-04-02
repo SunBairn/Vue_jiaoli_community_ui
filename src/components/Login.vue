@@ -170,8 +170,8 @@ export default {
             let token = response.data.data["token"];
             let jiaoliToken = response.data.data["jiaoliToken"];
             // 将token存储到cookie中
-            that.$cookies.set("jwttoken", token, 60 * 60 * 2);
-            that.$cookies.set("jiaoli_token",jiaoliToken,60*60*24*20);
+            that.$cookies.set("jwttoken", token, 1000*60 * 60 * 2);
+            that.$cookies.set("jiaoli_token",jiaoliToken,1000*60*60*24*20);
             // 将用户的ID和昵称存储到sessionstorage中，用于刷新jwttoken
             sessionStorage.setItem("userId",that.userId);
             sessionStorage.setItem("nickName",that.nickname);

@@ -1,5 +1,5 @@
 <template>
-  <div id="app" style="background-color:rgba(0, 0, 0, 0.04);">
+  <div id="app">
     <div id="head" class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-11 ml-5">
@@ -19,7 +19,7 @@
               <button type="button" class="btn btn-secondary search">搜索</button>
             </form>
             <ul class="navbar-nav ml-auto" style="margin-right:30px">
-              <li class="nav-item dropdown">
+              <li class="nav-item dropdown" v-if="avatar!=null">
                 <a
                   class="nav-link dropdown-toggle"
                   href="#"
@@ -48,16 +48,16 @@
                     <a href="#" class="a-notice">
                       <li class="list-item">公告</li>
                     </a>
-                    <a href="#" class="a-notice">
+                    <a href="#" class="a-notice" v-if="avatar!=null">
                       <li class="list-item">评论</li>
                     </a>
-                    <a href="#" class="a-notice">
+                    <a href="#" class="a-notice" v-if="avatar!=null">
                       <li class="list-item">关注</li>
                     </a>
-                    <a href="#" class="a-notice">
+                    <a href="#" class="a-notice" v-if="avatar!=null">
                       <li class="list-item">点赞</li>
                     </a>
-                    <a href="#" class="a-notice">
+                    <a href="#" class="a-notice" v-if="avatar!=null">
                       <li class="list-item">回答</li>
                     </a>
                   </ul>
@@ -195,9 +195,9 @@ export default {
           // 将token存储到cookie中
           let jwttoken = that.$cookies.get("jwttoken");
           if (jwttoken != null || jwttoken != "") {
-            that.$cookies.set("jwttoken", token, 60 * 60 * 2);
+            that.$cookies.set("jwttoken", token,1000 * 60 * 60 * 2);
           }
-          that.$cookies.set("jiaoli_token", jiaoliToken, 60 * 60 * 24 * 20);
+          that.$cookies.set("jiaoli_token", jiaoliToken,1000 * 60 * 60 * 24 * 20);
           // 将用户的ID和昵称存储到sessionstorage中，用于刷新jwttoken
           sessionStorage.setItem("userId", that.userId);
           sessionStorage.setItem("nickName", that.nickname);
@@ -219,6 +219,7 @@ export default {
 
 <style scoped>
 #app {
+  background-color:rgba(0, 0, 0, 0.04);
   overflow-x: hidden;
   height: 100%;
   width: 100%;

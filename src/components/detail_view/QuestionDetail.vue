@@ -27,7 +27,14 @@
         <div class="media-contain col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <ul class="list-group list-group-horizontal-md">
             <li class="list-group-item">
-              <a href="javascript:void(0)">
+              <a
+                href="javascript:void(0)"
+                data-toggle="question-like"
+                data-trigger="focus"
+                data-content="亲，登录后才能点赞哦！"
+                data-placement="bottom"
+                @click="questionLike(questionId,userId)"
+              >
                 <img src="./../../assets/icons/good.svg" alt width="25px" height="25px" />
                 点赞&nbsp;&nbsp;
                 <i>{{question.likeCount}}</i>
@@ -49,8 +56,22 @@
             id="content"
             placeholder="不要默默地看了，快点评论一下吧~"
             style="font-size:13px"
+            v-model="commentContent"
           ></textarea>
-          <button type="button" class="btn btn-secondary btn-sm btn-comment">评论</button>
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm btn-comment"
+            @click="questionComment()"
+          >评论</button>
+          <button type="button" data-toggle="modal" data-target="#myModal" ref="myModel" hidden></button>
+          <!-- Modal 提示模态框-->
+          <div class="modal fade" id="myModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content modal-body-custom">
+                <div class="modal-body m-auto">{{warningContent}}</div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <span style="margin-right:15px">全部评论</span>
@@ -74,29 +95,78 @@
               </span>
               <!-- 回复和点赞二级评论 -->
               <div class="comment-like float-right">
+                <a
+                  href="javascript:void(0)"
+                  class="comment-like"
+                  v-if="comment.replyCount!=0"
+                  @click="getReply(comment.id)"
+                >
+                  <span>查看回复</span>
+                  <span id="lookReply">({{comment.replyCount}})</span>
+                </a>
                 <a href="javascript:void(0)" class="comment-like" @click="showReply(comment.id)">
                   <img src="./../../assets/icons/comments.svg" width="20px" height="20px" alt />
                   <span>回复</span>
                 </a>
-                <a href="javascript:void(0)" class="comment-like">
+                <a
+                  href="javascript:void(0)"
+                  class="comment-like"
+                  @click="commentLike(comment.id,userId)"
+                >
                   <img src="./../../assets/icons/good.svg" width="20px" height="20px" alt />
-                  <span>{{comment.likeCount}}</span>
+                  <span :id="'replyLike'+comment.id" v-text="comment.likeCount"></span>
                 </a>
               </div>
+
+              <!-- 回复框 -->
               <div
                 class="col-lg-12 col-md-12 col-sm-12"
-                style="margin-bottom:35px"
+                style="margin-bottom:50px"
                 :id="comment.id"
                 v-show="isShowReply"
               >
-                <textarea class="form-control" rows="2" id="content" style="font-size:12px"></textarea>
-                <button type="button" class="btn btn-secondary btn-sm btn-comment">回复</button>
+                <textarea
+                  class="form-control"
+                  rows="2"
+                  id="content"
+                  style="font-size:12px"
+                  v-model="replyContent"
+                ></textarea>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm btn-comment"
+                  @click="replyComment(comment.id)"
+                >回复</button>
                 <button
                   type="button"
                   class="btn btn-secondary btn-sm btn-comment"
                   @click="hideReply(comment.id)"
                 >取消</button>
               </div>
+
+              <!-- 展示回复列表 -->
+              <div
+                class="col-lg-11 col-sm-11 col-md-11 reply"
+                :id="comment.id+'reply'"
+                v-show="isShowReplyContent"
+              >
+                <div
+                  class="reply-content"
+                  v-for="replyContent in leve12Comments"
+                  v-bind:key="replyContent.id"
+                >
+                  <a href="#" v-if="replyContent.user">
+                    {{replyContent.user.nickname}}&nbsp;&nbsp;
+                    <strong>:</strong>
+                  </a>回复
+                  <a href="#" v-if="comment.user">
+                    {{comment.user.nickname}}&nbsp;&nbsp;
+                    <strong>:</strong>
+                  </a>
+                  <span>{{replyContent.content}}</span>
+                </div>
+              </div>
+
               <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display:inline-block" />
             </div>
           </div>
@@ -137,8 +207,25 @@
 
 <script>
 import { formatDate } from "./../../assets/static/date";
+// 控制模态框（用来提示点赞和评论的校验结果）的展示与隐藏
+function isShowModal() {
+  $("#myModal").modal("show");
+  setTimeout(function() {
+    $("#myModal").modal("hide");
+  }, 1500);
+}
+// 用户没登录不允许点赞
+$(document).ready(function() {
+  let userId = sessionStorage.getItem("userId");
+  if (userId == null || userId == "") {
+    $('[data-toggle="question-like"]').popover();
+  }
+});
 function toggleComment() {
   $("#comment").toggle("slow");
+}
+function toggleReplayList(commentId) {
+  $("#" + commentId + "reply").toggle("slow");
 }
 function showReply(commentId) {
   $("#" + commentId).show("slow");
@@ -146,20 +233,27 @@ function showReply(commentId) {
 function hideReply(commentId) {
   $("#" + commentId).hide("slow");
 }
+
+// VUE
 export default {
   name: "QuestionDetail",
   data() {
     return {
-      questionId: "",
+      questionId: "", // 问题ID
       question: {
         user: {}
       }, // 问题
-      userId: "", // 用户ID
-      isShowReply: false, // 控制是否显示和默认不显示
+      userId: "", // 用户ID(从sessionStorage获得)
+      isShowReply: false, // 控制回复框默认不显示
+      isShowReplyContent: false, // 控制回复列表默认不展示展示
       isShowMoreComment: "", // 控制是否显示 “查看更多评论”
       level1Comments: [], // 一级评论
+      leve12Comments: [], // 回复（二级评论）
       level1CommentsPage: 0, // 控制一级评论的分页
-      commentCount: 0 // 一级评论总数
+      commentCount: 0, // 一级评论总数
+      commentContent: "", // 一级评论内容(评论框里的)
+      warningContent: "", // 控制模态框中显示的内容
+      replyContent: "" // 回复内容
     };
   },
   created: function() {
@@ -171,7 +265,7 @@ export default {
       that.commentCount = res.data.data.commentCount;
     });
     this.$requestApi.get(
-      "comment/find/" + that.level1CommentsPage,
+      "question/comment/find/" + that.level1CommentsPage,
       {
         type: 1,
         parentId: that.questionId
@@ -182,6 +276,7 @@ export default {
     );
   },
   updated: function() {
+    // 解决是否要显示查看更多评论的按钮
     if (this.level1Comments.length < this.commentCount) {
       this.isShowMoreComment = true;
     } else {
@@ -189,21 +284,24 @@ export default {
     }
   },
   methods: {
+    // 切换评论框
     isShowComment: function() {
       toggleComment();
     },
+    // 切换回复框
     showReply: function(commentId) {
       showReply(commentId);
     },
     hideReply: function(commentId) {
       hideReply(commentId);
     },
+
     // 改变一级评论页码数和追加数据
     changeLevel1CommentPage: function() {
       this.level1CommentsPage += 1;
       let that = this;
       this.$requestApi.get(
-        "comment/find/" + that.level1CommentsPage,
+        "question/comment/find/" + that.level1CommentsPage,
         {
           type: 1,
           parentId: that.questionId
@@ -214,6 +312,163 @@ export default {
           });
         }
       );
+    },
+    // 给问题点赞
+    questionLike: function(questionId, liketor) {
+      let that = this;
+      // 如果用户没登录，则弹出提示不能点赞
+      if (liketor == null || liketor == "") {
+        return;
+      }
+      this.$requestApi.get(
+        "question/like",
+        {
+          questionId: questionId,
+          liketor: that.userId
+        },
+        function(response) {
+          console.log(response);
+          if (response.data.flag == true) {
+            that.question.likeCount += 1;
+          } else {
+            that.warningContent = "亲，你已经点过赞了哦！";
+            that.$refs.myModel.click();
+            isShowModal();
+          }
+        }
+      );
+    },
+    // 评论问题
+    questionComment: function() {
+      if (this.userId == null || this.userId == "") {
+        this.warningContent = "登录后才能评论哦！";
+        this.$refs.myModel.click();
+        isShowModal();
+        return;
+      }
+      if (this.commentContent == null || this.commentContent == "") {
+        this.warningContent = "请输入评论内容！";
+        this.$refs.myModel.click();
+        isShowModal();
+      } else {
+        let that = this;
+        this.$requestApi.post(
+          "question/comment/add",
+          {
+            content: this.commentContent,
+            parentId: this.questionId,
+            type: 1,
+            commentator: this.userId,
+            questionId: this.questionId
+          },
+          function(response) {
+            if (response.data.flag == true) {
+              that.warningContent = "评论成功！";
+              that.$refs.myModel.click();
+              isShowModal();
+              // 定义一个json数组数据添加到后面去
+              let comment = {
+                user: {
+                  avatar: sessionStorage.getItem("avatar"),
+                  nickname: sessionStorage.getItem("nickName")
+                },
+                content: that.commentContent,
+                replyCount: 0,
+                // 获取当前时间戳
+                gmtCreate: Date.parse(new Date())
+              };
+              // 将当前评论显示到最后
+              that.level1Comments.push(comment);
+              console.log(that.level1Comments);
+              that.question.commentCount += 1;
+            } else {
+              that.warningContent = "评论失败，请稍后评论！";
+              that.$refs.myModel.click();
+              isShowModal();
+            }
+          }
+        );
+      }
+    },
+    // 获取回复,parentId 为当前评论的ID
+    getReply: function(parentId) {
+      let that = this;
+      this.$requestApi.get(
+        "question/comment/find/reply",
+        {
+          parentId: parentId,
+          questionId: this.questionId
+        },
+        function(response) {
+          console.log(response);
+          that.leve12Comments = response.data.data;
+          toggleReplayList(parentId);
+        }
+      );
+    },
+
+    // 回复评论
+    replyComment: function(parentId) {
+      if (this.userId == null || this.userId == "") {
+        this.warningContent = "登录后才能回复哦！";
+        this.$refs.myModel.click();
+        isShowModal();
+        return;
+      }
+      if (this.replyContent == null || this.replyContent == "") {
+        this.warningContent = "请输入回复内容！";
+        this.$refs.myModel.click();
+        isShowModal();
+      } else {
+        let that = this;
+        this.$requestApi.post(
+          "question/comment/add",
+          {
+            content: this.replyContent,
+            parentId: parentId,
+            type: 2,
+            commentator: this.userId,
+            questionId: this.questionId
+          },
+          function(response) {
+            if (response.data.flag == true) {
+              that.warningContent = "回复成功！";
+              that.$refs.myModel.click();
+              isShowModal();
+            } else {
+              that.warningContent = "回复失败，请稍后回复！";
+              that.$refs.myModel.click();
+              isShowModal();
+            }
+          }
+        );
+      }
+    },
+
+    //点赞评论
+    commentLike: function(commentId, liketor) {
+      let that = this;
+      // 如果用户没登录，则弹出提示不能点赞
+      if (liketor == null || liketor == "") {
+        return;
+      }
+      this.$requestApi.get(
+        "question/comment/like",
+        {
+          commentId: commentId,
+          liketor: that.userId
+        },
+        function(response) {
+          if (response.data.flag == true) {
+            $("#replyLike"+commentId).text(parseInt($("#replyLike"+commentId).text()) + 1);
+          } else {
+            that.warningContent = "亲，你已经点过赞了哦！";
+            that.$refs.myModel.click();
+            isShowModal();
+            // 动态变化点赞数
+          }
+        }
+      );
     }
   },
   filters: {
@@ -221,15 +476,6 @@ export default {
       var date = new Date(time);
       return formatDate(date, "yyyy-MM-dd hh:mm:ss");
     }
-  },
-  watch: {
-    // level1Comments:function(){
-    //   if (this.level1Comments.length<this.commentCount) {
-    //     this.isShowMoreComment=true;
-    //   }else{
-    //     this.isShowMoreComment = false;
-    //   }
-    // }
   }
 };
 </script>
@@ -269,7 +515,7 @@ a:hover {
   font-size: 13px;
 }
 .comment-nickname {
-  font-size: 10px;
+  font-size: 14px;
   color: #4a90e2;
 }
 .comment-content {
@@ -313,5 +559,26 @@ a:hover {
   height: 58px;
   cursor: pointer;
   border-radius: 50%;
+}
+.modal-body-custom {
+  width: 200px;
+  height: 100px;
+  align-content: center;
+  padding: 0.5rem;
+  color: #f37327;
+}
+.reply {
+  background-color: rgba(0, 0, 0, 0.04);
+  font-size: 12px;
+  margin: 20px 0 10px 0;
+  border-left: rgba(0, 0, 0, 0.1) solid 10px;
+}
+.reply > .reply-content {
+  padding: 10px 0 10px 0;
+}
+.reply a {
+  display: inline-block;
+  color: royalblue;
+  margin: 0 10px 0 10px;
 }
 </style>

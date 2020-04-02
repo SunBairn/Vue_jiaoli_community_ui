@@ -17,6 +17,7 @@ let http = axios.create({
     baseURL: 'http://localhost:1314/',
     // 当这个为false时，不会携带cookie
     withCredentials: true,
+    timeout:1000*20,
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
       'Authorzation': 'Bearer '+getCookie("jwttoken"),
@@ -55,3 +56,33 @@ let http = axios.create({
       return apiAxios('DELETE', url, params, response)
     }
   }
+
+  /**
+ * 下载文件
+ * @param {*} url: 请求地址
+ * @param {*} params: 请求参数
+ */
+export function downFileAction(url,params){
+  return axios({
+    url: url,
+    params: params,
+    method:'get' ,
+    responseType: 'blob'
+  })
+}
+/**
+ * 用于上传文件
+ * @param {*} url:请求地址
+ * @param {*} data:请求体数据
+ */
+export function fileUploadAction(url,data){
+  return axios({
+    url: url,
+    data: data,
+    method:'post' ,
+    headers:{
+      'Content-Type':'multipart/form-data'
+    },
+    timeout:1000*60*4  //上传时间4分钟
+  })
+}

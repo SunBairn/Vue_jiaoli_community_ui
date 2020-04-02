@@ -2,7 +2,7 @@
   <div class="body">
     <div class="nav pl-0">
       <nav class="navbar navbar-expand-lg navbar-light">
-        <router-link to="/nav/one" class="navbar-brand">首页</router-link>
+        <router-link to="/nav/life" class="navbar-brand">首页</router-link>
         <button
           class="navbar-toggler"
           type="button"
@@ -17,15 +17,15 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
             <router-link
-              :to="{path:'/nav/one'}"
+              :to="{path:'/nav/life'}"
               class="nav-item nav-link"
               v-bind:class="{active : isActive}"
             >校园生活</router-link>
-            <router-link :to="{path:'/nav/two'}" class="nav-item nav-link">新生问答</router-link>
-            <router-link :to="{path:'/nav/three'}" class="nav-item nav-link">校园活动</router-link>
-            <router-link :to="{path:'/nav/four'}" class="nav-item nav-link">考研论坛</router-link>
-            <router-link :to="{path:'/nav/five'}" class="nav-item nav-link">招聘求职</router-link>
-            <router-link :to="{path:'/nav/six'}" class="nav-item nav-link">站内公告</router-link>
+            <router-link :to="{path:'/nav/question'}" class="nav-item nav-link">新生问答</router-link>
+            <router-link :to="{path:'/nav/activity'}" class="nav-item nav-link">校园活动</router-link>
+            <router-link :to="{path:'/nav/article'}" class="nav-item nav-link">考研论坛</router-link>
+            <router-link :to="{path:'/nav/recruit'}" class="nav-item nav-link">招聘求职</router-link>
+            <router-link :to="{path:'/nav/notice'}" class="nav-item nav-link">站内公告</router-link>
           </div>
         </div>
       </nav>
@@ -52,7 +52,7 @@ export default {
     // 默认刚进来是首页和校园生活为激活状态
     isActive: function() {
       let path = this.$route.path;
-      if (path == "/" || path == "/nav/one") {
+      if (path == "/" || path == "/nav/life") {
         return true;
       } else {
         false;
