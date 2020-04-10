@@ -33,10 +33,16 @@
                   <span>发起</span>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="#">帖子</a>
-                  <a class="dropdown-item" href="#">问题</a>
+                  <router-link :to="{name : 'PublishInvitation'}">
+                    <a class="dropdown-item" href="javascript:void(0)">帖子</a>
+                  </router-link>
+                  <router-link :to="{name : 'PublishQuestion'}">
+                    <a class="dropdown-item" href="#">问题</a>
+                  </router-link>
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">文章</a>
+                  <router-link :to="{name : 'PublishArticle'}">
+                    <a class="dropdown-item" href="#">文章</a>
+                  </router-link>
                 </div>
               </li>
               <li class="nav-item dropdown" @mouseenter="mouseenter()" @mouseleave="mouseleave()">
@@ -45,19 +51,19 @@
                 </a>
                 <div class="my-list-group" :style="{ display : isActive}">
                   <ul class="list-group">
-                    <a href="#" class="a-notice">
+                    <a href="#">
                       <li class="list-item">公告</li>
                     </a>
-                    <a href="#" class="a-notice" v-if="avatar!=null">
+                    <a href="#" v-if="avatar!=null">
                       <li class="list-item">评论</li>
                     </a>
-                    <a href="#" class="a-notice" v-if="avatar!=null">
+                    <a href="#" v-if="avatar!=null">
                       <li class="list-item">关注</li>
                     </a>
-                    <a href="#" class="a-notice" v-if="avatar!=null">
+                    <a href="#" v-if="avatar!=null">
                       <li class="list-item">点赞</li>
                     </a>
-                    <a href="#" class="a-notice" v-if="avatar!=null">
+                    <a href="#" v-if="avatar!=null">
                       <li class="list-item">回答</li>
                     </a>
                   </ul>
@@ -74,26 +80,43 @@
                     style="left:92% ;top: 60px;"
                   >
                     <ul class="list-group">
-                      <a href="#" class="a-notice">
-                        <li class="list-item">个人中心</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path:'/uc/profile'}">
+                          <li class="list-item a-notice">个人中心</li>
+                        </router-link>
                       </a>
-                      <a href="#" class="a-notice">
-                        <li class="list-item">我的收藏</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path : '/uc/collection-list'}">
+                          <li class="list-item a-notice">我的收藏</li>
+                        </router-link>
                       </a>
-                      <a href="#" class="a-notice">
-                        <li class="list-item">我的关注</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path : '/uc/follow-list'}">
+                          <li class="list-item a-notice">我的关注</li>
+                        </router-link>
                       </a>
-                      <a href="#" class="a-notice">
-                        <li class="list-item">帖子管理</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path : '/uc/fan-list'}">
+                          <li class="list-item a-notice">我的粉丝</li>
+                        </router-link>
                       </a>
-                      <a href="#" class="a-notice">
-                        <li class="list-item">问题管理</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path : '/uc/invitation-list'}">
+                          <li class="list-item a-notice">帖子管理</li>
+                        </router-link>
                       </a>
-                      <a href="#" class="a-notice">
-                        <li class="list-item">文章管理</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path : '/uc/question-list'}">
+                          <li class="list-item a-notice">问题管理</li>
+                        </router-link>
                       </a>
-                      <a href="#" class="a-notice">
-                        <li class="list-item">退出</li>
+                      <a href="javascript:void(0)">
+                        <router-link :to="{path : '/uc/article-list'}">
+                          <li class="list-item a-notice">文章管理</li>
+                        </router-link>
+                      </a>
+                      <a href="javascript:void(0)" @click="loginOut()">
+                          <li class="list-item a-notice">退出</li>
                       </a>
                     </ul>
                   </div>
@@ -115,16 +138,13 @@
       <div class="row">
         <div id="content" class="col-sm-12 col-md-12 col-lg-10 mx-auto">
           <router-view></router-view>
-          <!-- <keep-alive>
-            <component :is="currentView"></component>
-          </keep-alive>-->
         </div>
       </div>
     </div>
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
-          <Footer style="margin-top:50px"></Footer>
+          <Footer class="footer1" style="margin-top:50px"></Footer>
         </div>
       </div>
     </div>
@@ -140,11 +160,12 @@ import Nav from "./components/Nav";
 import Login from "./components/Login";
 import Footer from "./components/Footer";
 import Register from "./components/Register";
+import UserCenter from "./components/UserCenter";
 export default {
   name: "App",
   data() {
     return {
-    //  componentsArry: ["Nav", "Login", "Register"], // 记录需要显示的组件
+      //  componentsArry: ["Nav", "Login", "Register"], // 记录需要显示的组件
       userId: "", // 用户的ID
       nickname: "", // 要显示的用户名
       avatar: null, //要显示的头像
@@ -157,7 +178,8 @@ export default {
     Nav,
     Footer,
     Login,
-    Register
+    Register,
+    UserCenter
   },
   beforeCreate: function() {
     this.nickname = sessionStorage.getItem("nickName");
@@ -176,6 +198,24 @@ export default {
     },
     mouseleave1() {
       this.isActive1 = "none";
+    },
+    // 退出登录
+    loginOut: function() {
+      let that = this;
+      this.$requestApi.get(
+        "loginOut",
+        {
+          userId: this.userId,
+          jiaoliToken: this.$cookies.get("jiaoli_token")
+        },
+        function(response) {
+          sessionStorage.clear();
+          if (response.data.flag == true) {
+            // 跳转到首页
+            that.$router.push({ path: "/" });
+          }
+        }
+      );
     }
   },
   created: function() {
@@ -195,9 +235,13 @@ export default {
           // 将token存储到cookie中
           let jwttoken = that.$cookies.get("jwttoken");
           if (jwttoken != null || jwttoken != "") {
-            that.$cookies.set("jwttoken", token,1000 * 60 * 60 * 2);
+            that.$cookies.set("jwttoken", token, 1000 * 60 * 60 * 2);
           }
-          that.$cookies.set("jiaoli_token", jiaoliToken,1000 * 60 * 60 * 24 * 20);
+          that.$cookies.set(
+            "jiaoli_token",
+            jiaoliToken,
+            1000 * 60 * 60 * 24 * 20
+          );
           // 将用户的ID和昵称存储到sessionstorage中，用于刷新jwttoken
           sessionStorage.setItem("userId", that.userId);
           sessionStorage.setItem("nickName", that.nickname);
@@ -212,17 +256,17 @@ export default {
     this.avatar = sessionStorage.getItem("avatar");
   },
   mounted() {},
-  computed: {},
-  
+  computed: {}
 };
 </script>
 
 <style scoped>
 #app {
-  background-color:rgba(0, 0, 0, 0.04);
+  background-color: rgba(0, 0, 0, 0.04);
   overflow-x: hidden;
   height: 100%;
   width: 100%;
+  min-height: 100%;
 }
 #head {
   background-color: #f8f9fa;
@@ -231,7 +275,9 @@ export default {
   z-index: 20;
 }
 #left-content {
+  min-width: 100%;
   margin-top: 80px;
+  padding-bottom: 100px;
 }
 .logo {
   color: #777;
@@ -276,11 +322,25 @@ export default {
   display: block;
   padding: 0.75rem 1.25rem;
 }
+
 .a-notice {
   text-decoration: none;
   color: #666;
 }
 .a-notice:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+a {
+  text-decoration-line: none;
+}
+.footer1 {
+  height: 100px;
+  margin-top: -100px;
 }
 </style>

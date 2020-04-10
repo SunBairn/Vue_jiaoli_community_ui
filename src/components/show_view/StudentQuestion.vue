@@ -10,7 +10,7 @@
       />
       <div class="media-body">
         <h6 class="mt-0">
-          <router-link :to="{path:`/question/${question.id}`}"><a href="javascript:void(0)">{{ question.title | titleEllipsis}}</a></router-link>
+          <router-link :to="{path:`/question/${question.id}`,query : {type : '2'}}"><a href="javascript:void(0)">{{ question.title | titleEllipsis}}</a></router-link>
         </h6>
         <span class="contain-font-size">{{ question.content | ellipsis }}</span>
         <br />
@@ -55,7 +55,7 @@
 <script>
 import {formatDate} from '../../assets/static/date'
 export default {
-  name: "HelloWorld",
+  name: "StudentQuestion",
   props:['currentSort'],
   data() {
     return {
@@ -68,7 +68,7 @@ export default {
       page: "",  //   页码数
       total:"",   //  总记录数
       pageArry:[],  //  显示页码的数组
-      questions: []  // 问题集合
+      questions: [],  // 问题集合
       
     };
   },

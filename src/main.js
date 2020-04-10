@@ -12,7 +12,12 @@ import RequestApi from './api/https.js'
 import Comjs from './assets/static/common'
 import './assets/static/common.css'
 import VueCookies from 'vue-cookies'
+// 全局注册 markdown 插件
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
 
+// 使用
+Vue.use(mavonEditor)
 Vue.use(VueCookies)
 
 Vue.config.productionTip = false
@@ -32,7 +37,7 @@ Vue.component('IndexCommon',IndexCommon)
 new Vue({
   el: '#app',
   data : {
-   
+   aaa:"hahah"
   },
   router,
   components: {

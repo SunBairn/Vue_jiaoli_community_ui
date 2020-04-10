@@ -17,11 +17,11 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
             <router-link
-              :to="{path:'/nav/life'}"
+              :to="{path:'/nav/life'}"  
               class="nav-item nav-link"
               v-bind:class="{active : isActive}"
             >校园生活</router-link>
-            <router-link :to="{path:'/nav/question'}" class="nav-item nav-link">新生问答</router-link>
+            <router-link :to="{path:'/nav/question'}" class="nav-item nav-link" >新生问答</router-link>
             <router-link :to="{path:'/nav/activity'}" class="nav-item nav-link">校园活动</router-link>
             <router-link :to="{path:'/nav/article'}" class="nav-item nav-link">考研论坛</router-link>
             <router-link :to="{path:'/nav/recruit'}" class="nav-item nav-link">招聘求职</router-link>

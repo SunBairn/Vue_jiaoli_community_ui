@@ -12,7 +12,7 @@
       </a>
       <div class="media-body">
         <h6 class="mt-0">
-          <router-link :to="{path: '/question/2'}">
+          <router-link :to="{path: `/question/${question.id}`,query:{type:'1'}}">
           <a href="#">{{ question.title | titleEllipsis}}</a>
           </router-link>
         </h6>

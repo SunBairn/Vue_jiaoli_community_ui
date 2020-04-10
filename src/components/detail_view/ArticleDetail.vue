@@ -3,25 +3,25 @@
     <div class="row">
       <div class="col-lg-9 col-md-19 col-sm-9">
         <h4 class="col-lg-12 col-md-12 col-sm-12" style="margin-top:10px">
-          <span>{{question.title}}</span>
+          <span>{{article.title}}</span>
         </h4>
         <span class="media-contain col-lg-12 col-md-12 col-sm-12 col-xs-12">
           作者：
-          <span>{{question.user.nickname}}</span>&nbsp;&nbsp;
+          <span>{{article.user.nickname}}</span>&nbsp;&nbsp;
           | 发布时间：
-          <span>{{question.gmtCreate | formatDate}}</span>&nbsp;&nbsp;
+          <span>{{article.gmtCreate | formatDate}}</span>&nbsp;&nbsp;
           | 阅读数：
-          <span>{{question.viewCount}}</span>&nbsp;&nbsp;
-          <div v-if="question.user.id == userId" style="margin-left:30px;display:inline-block;cursor: pointer;" @click="editor(question.type)">
+          <span>{{article.viewCount}}</span>&nbsp;&nbsp;
+          <router-link :to="{name:'PublishArticle',params:{'article':this.article}}" v-if="article.user.id == userId" style="margin-left:30px">
             <img src="./../../assets/icons/pencil-square.svg" class="edit" />
             <span class="media-contain is-edit">编辑</span>
-          </div>
+          </router-link>
         </span>
         <hr />
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-bottom:70px">
           <mavon-editor
             class="editor"
-            :value="question.content"
+            :value="article.content"
             :subfield="prop.subfield"
             :defaultOpen="prop.defaultOpen"
             :toolbarsFlag="prop.toolbarsFlag"
@@ -30,20 +30,38 @@
           />
         </div>
         <hr />
+        <div class="col-lg-12 col-md-12 col-sm-12 mt-2 ml-2" v-if="article.url!=null&& article.url!=''">
+          <a :href="article.url">
+            <button type="botton" class="btn btn-secondary">下载附件</button>
+            <span>{{fileName}}</span>
+          </a>
+        </div>
         <!-- 点赞和评论 -->
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <div class="tag-show" v-for="(tag,index) in tags" :key="index">
+            <img src="../../assets/icons/tag-fill.svg" alt />
+            <span>{{tag}}</span>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 ml-2 mt-3" v-if="article.column">
+          <strong>
+            所属专栏：
+            <em>{{article.column.name}}</em>
+          </strong>
+        </div>
         <div class="media-contain col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <ul class="list-group list-group-horizontal-md">
             <li class="list-group-item">
               <a
                 href="javascript:void(0)"
-                data-toggle="question-like"
+                data-toggle="article-like"
                 data-trigger="focus"
                 data-placement="bottom"
-                @click="questionLike(questionId,userId)"
+                @click="questionLike(articleId,userId)"
               >
                 <img src="./../../assets/icons/good.svg" alt width="25px" height="25px" />
                 点赞&nbsp;&nbsp;
-                <i>{{question.likeCount}}</i>
+                <i>{{article.likeCount}}</i>
               </a>
             </li>
             <li class="list-group-item">
@@ -81,7 +99,7 @@
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <span style="margin-right:15px">全部评论</span>
-          <em>{{question.commentCount}}</em>
+          <em>{{article.commentCount}}</em>
         </div>
         <hr />
         <!-- 一级评论展示 -->
@@ -97,7 +115,7 @@
               <span class="comment-content">{{comment.content}}</span>
               <br />
               <span class="media-contain">
-                <span>{{comment.gmtCreate | formatDate}}</span>
+                <span>{{comment.publishdate | formatDate}}</span>
               </span>
               <!-- 回复和点赞二级评论 -->
               <div class="comment-like float-right">
@@ -191,17 +209,17 @@
       <div class="col-lg-3 col-md-3 col-sm-3 mt-3" style="border-left:1px solid #e6e6e6">
         <div class="media">
           <a href="#">
-            <img class="avatar1 mr-3" :src="question.user.avatar" />
+            <img class="avatar1 mr-3" :src="article.user.avatar" />
           </a>
           <div class="media-body mt-2">
             <h6>
-              <a href="#" style="color:#444">{{question.user.nickname}}</a>
+              <a href="#" style="color:#444">{{article.user.nickname}}</a>
             </h6>
             <a href>
               <span style="font-size:12px; color:blue">Ta的个人主页></span>
             </a>
             <span style="font-size:14px;" class="ml-3">粉丝：</span>
-            <em>{{question.user.fanscount}}</em>
+            <em>{{article.user.fanscount}}</em>
           </div>
         </div>
         <hr class="ml-2" />
@@ -224,7 +242,7 @@ function isShowModal() {
 // $(document).ready(function() {
 //   let userId = sessionStorage.getItem("userId");
 //   if (userId == null || userId == "") {
-//     $('[data-toggle="question-like"]').popover();
+    
 //   }
 // });
 function toggleComment() {
@@ -242,13 +260,15 @@ function hideReply(commentId) {
 
 // VUE
 export default {
-  name: "QuestionDetail",
+  name: "ArticleDetail",
   data() {
     return {
-      questionId: "", // 问题ID
-      type: "", // 所属类型
-      question: {
-        user: {}
+      articleId: "", // 文章ID
+      fileName:"", // 文件名
+      tags: [], // 展示文章的标签
+      article: {
+        user: {},
+        column: {}
       }, // 问题
       userId: "", // 用户ID(从sessionStorage获得)
       isShowReply: false, // 控制回复框默认不显示
@@ -263,29 +283,34 @@ export default {
     };
   },
   created: function() {
-    this.type = this.$route.query.type;
     let that = this;
     this.userId = sessionStorage.getItem("userId");
-    that.questionId = this.$route.params.id;
-    this.$requestApi.get("question/" + that.questionId, {}, function(res) {
-      that.question = res.data.data;
+    that.articleId = this.$route.params.id;
+    this.$requestApi.get("article/find/" + that.articleId, {}, function(res) {
+      that.article = res.data.data;
+      if (res.data.data.tag != null) {
+        that.tags = that.article.tag.split(",");
+      }
+      let index = res.data.data.url.lastIndexOf("\/");
+      that.fileName = res.data.data.url.substring(index+1,res.data.data.url.length)
     });
     this.$requestApi.get(
-      "question/comment/find/" + that.level1CommentsPage,
+      "article/comment/find/" + that.level1CommentsPage,
       {
         type: 1,
-        parentId: that.questionId
+        parentId: that.articleId
       },
       function(response) {
-        if(response.data.data.length<10){
+        if (response.data.data.length < 10) {
           that.isShowMoreComment = false;
-        }else{
+        } else {
           that.isShowMoreComment = true;
         }
         that.level1Comments = response.data.data;
       }
     );
   },
+
   methods: {
     // 切换评论框
     isShowComment: function() {
@@ -304,42 +329,41 @@ export default {
       this.level1CommentsPage += 1;
       let that = this;
       this.$requestApi.get(
-        "question/comment/find/" + that.level1CommentsPage,
+        "article/comment/find/" + that.level1CommentsPage,
         {
-          type: 1,
-          parentId: that.questionId
+          parentId: that.articleId
         },
         function(response) {
+          if (response.data.data.length < 10) {
+            that.isShowMoreComment = false;
+          } else {
+            that.isShowMoreComment = true;
+          }
           response.data.data.forEach((item, index) => {
             that.level1Comments.push(item);
-            if(response.data.data.length<10){
-              that.isShowMoreComment=false;
-            }else{
-              that.isShowMoreComment=true;
-            }
           });
         }
       );
     },
     // 给问题点赞
-    questionLike: function(questionId, liketor) {
+    questionLike: function(articleId, liketor) {
       let that = this;
       // 如果用户没登录，则弹出提示不能点赞
       if (liketor == null || liketor == "") {
-        this.warningContent="登录后才能点赞哦！"
+        this.warningContent="登录后才能点赞哦！",
         this.$refs.myModel.click();
         isShowModal();
         return;
       }
       this.$requestApi.get(
-        "question/like",
+        "article/like",
         {
-          questionId: questionId,
+          articleId: articleId,
           liketor: that.userId
         },
         function(response) {
           if (response.data.flag == true) {
-            that.question.likeCount += 1;
+            that.article.likeCount += 1;
           } else {
             that.warningContent = "亲，你已经点过赞了哦！";
             that.$refs.myModel.click();
@@ -363,13 +387,13 @@ export default {
       } else {
         let that = this;
         this.$requestApi.post(
-          "question/comment/add",
+          "article/comment/add",
           {
             content: this.commentContent,
-            parentId: this.questionId,
+            parentId: this.articleId,
             type: 1,
-            commentator: this.userId,
-            questionId: this.questionId
+            userId: this.userId,
+            articleId: this.articleId
           },
           function(response) {
             if (response.data.flag == true) {
@@ -384,13 +408,12 @@ export default {
                 },
                 content: that.commentContent,
                 replyCount: 0,
-                likeCount:0,
                 // 获取当前时间戳
                 gmtCreate: Date.parse(new Date())
               };
               // 将当前评论显示到最后
               that.level1Comments.push(comment);
-              that.question.commentCount += 1;
+              that.article.commentCount += 1;
             } else {
               that.warningContent = "评论失败，请稍后评论！";
               that.$refs.myModel.click();
@@ -404,10 +427,10 @@ export default {
     getReply: function(parentId) {
       let that = this;
       this.$requestApi.get(
-        "question/comment/find/reply",
+        "article/comment/find/reply",
         {
           parentId: parentId,
-          questionId: this.questionId
+          articleId: this.articleId
         },
         function(response) {
           that.leve12Comments = response.data.data;
@@ -431,13 +454,13 @@ export default {
       } else {
         let that = this;
         this.$requestApi.post(
-          "question/comment/add",
+          "article/comment/add",
           {
             content: this.replyContent,
             parentId: parentId,
             type: 2,
             commentator: this.userId,
-            questionId: this.questionId
+            articleId: this.articleId
           },
           function(response) {
             if (response.data.flag == true) {
@@ -462,7 +485,7 @@ export default {
         return;
       }
       this.$requestApi.get(
-        "question/comment/like",
+        "article/comment/like",
         {
           commentId: commentId,
           liketor: that.userId
@@ -480,14 +503,6 @@ export default {
           }
         }
       );
-    },
-     // 跳转到编辑页面
-    editor: function(type){
-      if(type==1){
-        this.$router.push({name:'PublishInvitation',params:{"content":this.question}});
-      }else{
-        this.$router.push({name : 'PublishQuestion',params:{"content": this.question}})
-      }
     }
   },
   computed: {
@@ -617,6 +632,13 @@ a:hover {
   display: inline-block;
   color: royalblue;
   margin: 0 10px 0 10px;
-  
+}
+.tag-show {
+  display: inline-block;
+  margin: 10px 10px 0px 10px;
+  padding: 5px 10px;
+  background-color: rgba(0, 128, 11, 0.678);
+  cursor: pointer;
+  border-radius: 10%;
 }
 </style>

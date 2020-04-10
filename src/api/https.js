@@ -64,7 +64,7 @@ let http = axios.create({
  */
 export function downFileAction(url,params){
   return axios({
-    url: url,
+    url: "http://localhost:9000",
     params: params,
     method:'get' ,
     responseType: 'blob'
@@ -75,14 +75,14 @@ export function downFileAction(url,params){
  * @param {*} url:请求地址
  * @param {*} data:请求体数据
  */
-export function fileUploadAction(url,data){
+export function fileUploadAction(data){
   return axios({
-    url: url,
+    url: "http://localhost:9000/file/upload",
     data: data,
     method:'post' ,
     headers:{
       'Content-Type':'multipart/form-data'
     },
-    timeout:1000*60*4  //上传时间4分钟
+    timeout:1000*60*2  //上传时间2分钟
   })
 }
