@@ -26,7 +26,7 @@
           </keep-alive>
         </div>
         <div class="right col-sm-12 col-md-3 col-lg-3 d-none d-md-block">
-          <span>这里是右侧内容</span>
+          <IndexRightCommon></IndexRightCommon>
         </div>
       </div>
   </div>
@@ -36,7 +36,6 @@
 import InstationNotice from "../components/show_view/InstationNotice";
 import SchoolActivity from "../components/show_view/SchoolActivity";
 import SchoolLife from "../components/show_view/SchoolLife";
-import SchoolRecruit from "../components/show_view/SchoolRecruit";
 import StudentQuestion from "../components/show_view/StudentQuestion";
 import ArticleForum from "../components/show_view/ArticleForum";
 export default {
@@ -47,7 +46,7 @@ export default {
       hotActive:false,
       awaitActive:false,
       currentSort:"new",
-      componentsArry: ["SchoolLife", "StudentQuestion","SchoolActivity","ArticleForum","SchoolRecruit","InstationNotice"]
+      componentsArry: ["SchoolLife", "StudentQuestion","SchoolActivity","ArticleForum","InstationNotice"]
     };
   },
   components: {
@@ -55,7 +54,6 @@ export default {
     StudentQuestion,
     SchoolActivity,
     ArticleForum,
-    SchoolRecruit,
     InstationNotice,
   },
   methods: {
@@ -96,9 +94,6 @@ export default {
       if (routeParm == "article") {
         return "考研论坛";
       }
-      if (routeParm == "recruit") {
-        return "招聘求职";
-      }
       if (routeParm == "notice") {
         return "站内公告";
       }
@@ -118,11 +113,8 @@ export default {
       if (routeParm == "article") {
         return this.componentsArry[3];
       }
-      if (routeParm == "recruit") {
-        return this.componentsArry[4];
-      }
       if (routeParm == "notice") {
-        return this.componentsArry[5];
+        return this.componentsArry[4];
       }
       return this.componentsArry[0];
     },

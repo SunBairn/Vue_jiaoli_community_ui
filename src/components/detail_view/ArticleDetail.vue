@@ -12,7 +12,11 @@
           <span>{{article.gmtCreate | formatDate}}</span>&nbsp;&nbsp;
           | 阅读数：
           <span>{{article.viewCount}}</span>&nbsp;&nbsp;
-          <router-link :to="{name:'PublishArticle',params:{'article':this.article}}" v-if="article.user.id == userId" style="margin-left:30px">
+          <router-link
+            :to="{name:'PublishArticle',params:{'article':this.article}}"
+            v-if="article.user.id == userId"
+            style="margin-left:30px"
+          >
             <img src="./../../assets/icons/pencil-square.svg" class="edit" />
             <span class="media-contain is-edit">编辑</span>
           </router-link>
@@ -30,7 +34,10 @@
           />
         </div>
         <hr />
-        <div class="col-lg-12 col-md-12 col-sm-12 mt-2 ml-2" v-if="article.url!=null&& article.url!=''">
+        <div
+          class="col-lg-12 col-md-12 col-sm-12 mt-2 ml-2"
+          v-if="article.url!=null&& article.url!=''"
+        >
           <a :href="article.url">
             <button type="botton" class="btn btn-secondary">下载附件</button>
             <span>{{fileName}}</span>
@@ -68,6 +75,18 @@
               <a href="javascript:void(0)" @click="isShowComment()">
                 <img src="./../../assets/icons/comments.svg" alt width="25px" height="25px" />
                 评论
+              </a>
+            </li>
+            <li class="list-group-item" v-show="isShowCollect==1">
+              <a href="javascript:void(0)" @click="addCollection()">
+                <img src="./../../assets/icons/未收藏.svg" alt width="25px" height="25px" />
+                收藏
+              </a>
+            </li>
+            <li class="list-group-item" v-show="isShowCollect==2">
+              <a href="javascript:void(0)" @click="deleteCollection()">
+                <img src="./../../assets/icons/收藏.svg" alt width="25px" height="25px" />
+                取消收藏
               </a>
             </li>
           </ul>
@@ -212,18 +231,20 @@
             <img class="avatar1 mr-3" :src="article.user.avatar" />
           </a>
           <div class="media-body mt-2">
-            <h6>
-              <a href="#" style="color:#444">{{article.user.nickname}}</a>
-            </h6>
-            <a href>
-              <span style="font-size:12px; color:blue">Ta的个人主页></span>
-            </a>
+            <router-link :to="{path:`/home/page/article/${article.user.id}`}">
+              <h6>
+                <a href="#" style="color:#444">{{article.user.nickname}}</a>
+              </h6>
+              <a href="javascript:void(0)">
+                <span style="font-size:12px; color:blue">Ta的个人主页></span>
+              </a>
+            </router-link>
             <span style="font-size:14px;" class="ml-3">粉丝：</span>
             <em>{{article.user.fanscount}}</em>
           </div>
         </div>
         <hr class="ml-2" />
-        <h4>相关问题</h4>
+        <IndexRightCommon></IndexRightCommon>
       </div>
     </div>
   </div>
@@ -238,13 +259,6 @@ function isShowModal() {
     $("#myModal").modal("hide");
   }, 1500);
 }
-// 用户没登录不允许点赞
-// $(document).ready(function() {
-//   let userId = sessionStorage.getItem("userId");
-//   if (userId == null || userId == "") {
-    
-//   }
-// });
 function toggleComment() {
   $("#comment").toggle("slow");
 }
@@ -264,13 +278,14 @@ export default {
   data() {
     return {
       articleId: "", // 文章ID
-      fileName:"", // 文件名
+      fileName: "", // 显示已经上传的文件名
       tags: [], // 展示文章的标签
       article: {
         user: {},
         column: {}
       }, // 问题
       userId: "", // 用户ID(从sessionStorage获得)
+      isShowCollect: "", // 控制展示收藏、未收藏、什么都不显示（1代表显示收藏，2代表显示已收藏，3代表什么都不显示）
       isShowReply: false, // 控制回复框默认不显示
       isShowReplyContent: false, // 控制回复列表默认不展示展示
       isShowMoreComment: "", // 控制是否显示 “查看更多评论”
@@ -285,20 +300,48 @@ export default {
   created: function() {
     let that = this;
     this.userId = sessionStorage.getItem("userId");
-    that.articleId = this.$route.params.id;
-    this.$requestApi.get("article/find/" + that.articleId, {}, function(res) {
+    this.articleId = this.$route.params.id;
+    this.$requestApi.get("article/find/" + this.articleId, {}, function(res) {
+      console.log(res);
+      let that1 = that;
       that.article = res.data.data;
+      if (that.article.user.id == that.userId) {
+        // 如果是作者本人看这篇文章，则不显示
+        that.isShowCollect = 3;
+      } else {
+        // 否者判断用户是否已经收藏了该篇文章
+        that.$requestApi.get(
+          "collection/find",
+          {
+            userId: that.userId,
+            articleId: that.articleId
+          },
+          function(response) {
+            // 如果为true，则表示该用户已经收藏了该篇文章
+            if (response.data.flag == true) {
+              that1.isShowCollect = 2;
+            } else {
+              that1.isShowCollect = 1;
+            }
+          }
+        );
+      }
       if (res.data.data.tag != null) {
         that.tags = that.article.tag.split(",");
       }
-      let index = res.data.data.url.lastIndexOf("\/");
-      that.fileName = res.data.data.url.substring(index+1,res.data.data.url.length)
+      if (res.data.data.url != null) {
+        let index = res.data.data.url.lastIndexOf("/");
+        that.fileName = res.data.data.url.substring(
+          index + 1,
+          res.data.data.url.length
+        );
+      }
     });
     this.$requestApi.get(
-      "article/comment/find/" + that.level1CommentsPage,
+      "article/comment/find/" + this.level1CommentsPage,
       {
         type: 1,
-        parentId: that.articleId
+        parentId: this.articleId
       },
       function(response) {
         if (response.data.data.length < 10) {
@@ -350,8 +393,8 @@ export default {
       let that = this;
       // 如果用户没登录，则弹出提示不能点赞
       if (liketor == null || liketor == "") {
-        this.warningContent="登录后才能点赞哦！",
-        this.$refs.myModel.click();
+        (this.warningContent = "登录后才能点赞哦！"),
+          this.$refs.myModel.click();
         isShowModal();
         return;
       }
@@ -482,6 +525,9 @@ export default {
       let that = this;
       // 如果用户没登录，则弹出提示不能点赞
       if (liketor == null || liketor == "") {
+        this.warningContent = "登录后才能点赞哦！";
+        this.$refs.myModel.click();
+        isShowModal();
         return;
       }
       this.$requestApi.get(
@@ -500,6 +546,54 @@ export default {
             that.$refs.myModel.click();
             isShowModal();
             // 动态变化点赞数
+          }
+        }
+      );
+    },
+
+    // 收藏
+    addCollection: function() {
+      let that = this;
+      // 用户没有登录则不可以收藏
+      if (this.userId == null || this.userId == "") {
+        this.warningContent = "登录后才能收藏哦！";
+        this.$refs.myModel.click();
+        isShowModal();
+        return;
+      }
+      this.$requestApi.post(
+        "collection/add",
+        {
+          userId: this.userId,
+          articleId: this.articleId
+        },
+        response => {
+          if (response.data.flag == true) {
+            that.warningContent = "收藏成功！";
+            that.$refs.myModel.click();
+            isShowModal();
+            that.isShowCollect = 2;
+          } else {
+            that.warningContent = "收藏失败！";
+            that.$refs.myModel.click();
+            isShowModal();
+          }
+        }
+      );
+    },
+
+    // 取消收藏
+    deleteCollection: function() {
+      let that = this;
+      this.$requestApi.delete(
+        "collection/delete",
+        {
+          userId: this.userId,
+          articleId: this.articleId
+        },
+        response => {
+          if (response.data.flag == true) {
+            that.isShowCollect = 1;
           }
         }
       );

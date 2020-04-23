@@ -1,6 +1,7 @@
 <template>
   <div class="body">
     <div class="media" v-for="article in articles" v-bind:key="article.id">
+      <router-link :to="{path:`/home/page/article/${article.user.id}`}">
       <img
         :src="article.user.avatar"
         width="45"
@@ -8,6 +9,7 @@
         class="ml-3 mr-3 rounded"
         alt="head portrait"
       />
+      </router-link>
       <div class="media-body">
         <h6 class="mt-0">
           <router-link :to="{path : `/article/${article.id}`}">

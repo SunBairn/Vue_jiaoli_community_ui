@@ -1,22 +1,12 @@
 <template>
-  <div class="col-lg-12 col-md-12 col-sm-12" style="min-height: 590px;">
-    <!-- 顶部标题 -->
-    <div>
-      <h3 class="title">我的收藏</h3>
-    </div>
-    <!-- 帖子列表 -->
-    <div v-if="collections!=null && collections!=''">
+  <div class="col-lg-12 col-md-12 col-sm-12" style="min-height: 365px;">
+    <div v-if="collections!=null&&collections!=''">
       <div class="media" v-for="collection in collections" v-bind:key="collection.id">
         <div class="media-body">
           <h6 class="mt-0">
             <router-link :to="{path : `/article/${collection.id}`}">
               <a href="javascript:void(0)">{{ collection.title | titleEllipsis}}</a>
             </router-link>
-            <button
-              type="button"
-              class="btn btn-outline-secondary cancel-collection"
-              @click="cancelCollection(collection.id)"
-            >取消收藏</button>
           </h6>
           <span class="contain-font-size">{{ collection.content | ellipsis }}</span>
           <br />
@@ -46,10 +36,11 @@
 <script>
 import { formatDate } from "../../assets/static/date";
 export default {
-  name: "Templeta",
+  name: "Collection",
+  props: ["userId"],
   data() {
     return {
-      collections: "" // 收藏列表
+      collections: "" // 收藏文章内容
     };
   },
   created: function() {
@@ -57,35 +48,12 @@ export default {
     this.$requestApi.get(
       "user/collection",
       {
-        userId: sessionStorage.getItem("userId")
+        userId: this.userId
       },
       response => {
         that.collections = response.data.data;
       }
     );
-  },
-  methods: {
-    // 取消收藏
-    cancelCollection: function(collectionId) {
-      let that = this;
-      this.$requestApi.delete(
-        "collection/delete",
-        {
-          userId: sessionStorage.getItem("userId"),
-          articleId: collectionId
-        },
-        response => {
-          console.log(response.data.flag)
-          if (response.data.flag == true) {
-            that.collections.forEach((element,index)=>{
-              if(element.id==collectionId){
-                that.collections.splice(index,1);
-              }
-            })
-          }
-        }
-      );
-    }
   },
   filters: {
     ellipsis: function(value) {
@@ -111,14 +79,6 @@ export default {
 </script>
 
 <style scoped>
-.title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #3d3d3d;
-  height: 90px;
-  line-height: 90px;
-  border-bottom: 1px solid #e0e0e0;
-}
 a {
   text-decoration: none;
   font-size: 20px;
@@ -129,11 +89,6 @@ a {
 }
 a:hover {
   color: #b20b12;
-}
-.cancel-collection {
-  float: right;
-  font-size: 15px;
-  margin-right: 15px;
 }
 .media-contain {
   font-size: 12px;

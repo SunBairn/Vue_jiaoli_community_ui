@@ -24,7 +24,6 @@
             <router-link :to="{path:'/nav/question'}" class="nav-item nav-link" >新生问答</router-link>
             <router-link :to="{path:'/nav/activity'}" class="nav-item nav-link">校园活动</router-link>
             <router-link :to="{path:'/nav/article'}" class="nav-item nav-link">考研论坛</router-link>
-            <router-link :to="{path:'/nav/recruit'}" class="nav-item nav-link">招聘求职</router-link>
             <router-link :to="{path:'/nav/notice'}" class="nav-item nav-link">站内公告</router-link>
           </div>
         </div>

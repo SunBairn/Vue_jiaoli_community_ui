@@ -162,7 +162,6 @@ export default {
           password: that.password
         },
         function(response) {
-          console.log(response)
           if (response.data.flag == true) {
             that.nickname = response.data.data["nickname"];
             that.avatar = response.data.data["avatar"];

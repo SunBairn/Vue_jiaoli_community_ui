@@ -12,7 +12,11 @@
           <span>{{question.gmtCreate | formatDate}}</span>&nbsp;&nbsp;
           | 阅读数：
           <span>{{question.viewCount}}</span>&nbsp;&nbsp;
-          <div v-if="question.user.id == userId" style="margin-left:30px;display:inline-block;cursor: pointer;" @click="editor(question.type)">
+          <div
+            v-if="question.user.id == userId"
+            style="margin-left:30px;display:inline-block;cursor: pointer;"
+            @click="editor(question.type)"
+          >
             <img src="./../../assets/icons/pencil-square.svg" class="edit" />
             <span class="media-contain is-edit">编辑</span>
           </div>
@@ -190,22 +194,26 @@
       <!--右边布局-->
       <div class="col-lg-3 col-md-3 col-sm-3 mt-3" style="border-left:1px solid #e6e6e6">
         <div class="media">
-          <a href="#">
-            <img class="avatar1 mr-3" :src="question.user.avatar" />
-          </a>
-          <div class="media-body mt-2">
-            <h6>
-              <a href="#" style="color:#444">{{question.user.nickname}}</a>
-            </h6>
-            <a href>
-              <span style="font-size:12px; color:blue">Ta的个人主页></span>
+          <router-link :to="{path:`/home/page/article/${question.user.id}`}">
+            <a href="#">
+              <img class="avatar1 mr-3" :src="question.user.avatar" />
             </a>
+          </router-link>
+          <div class="media-body mt-2">
+            <router-link :to="{path:`/home/page/article/${question.user.id}`}">
+              <h6>
+                <a href="#" style="color:#444">{{question.user.nickname}}</a>
+              </h6>
+              <a href>
+                <span style="font-size:12px; color:blue">Ta的个人主页></span>
+              </a>
+            </router-link>
             <span style="font-size:14px;" class="ml-3">粉丝：</span>
             <em>{{question.user.fanscount}}</em>
           </div>
         </div>
         <hr class="ml-2" />
-        <h4>相关问题</h4>
+        <IndexRightCommon></IndexRightCommon>
       </div>
     </div>
   </div>
@@ -277,9 +285,9 @@ export default {
         parentId: that.questionId
       },
       function(response) {
-        if(response.data.data.length<10){
+        if (response.data.data.length < 10) {
           that.isShowMoreComment = false;
-        }else{
+        } else {
           that.isShowMoreComment = true;
         }
         that.level1Comments = response.data.data;
@@ -312,10 +320,10 @@ export default {
         function(response) {
           response.data.data.forEach((item, index) => {
             that.level1Comments.push(item);
-            if(response.data.data.length<10){
-              that.isShowMoreComment=false;
-            }else{
-              that.isShowMoreComment=true;
+            if (response.data.data.length < 10) {
+              that.isShowMoreComment = false;
+            } else {
+              that.isShowMoreComment = true;
             }
           });
         }
@@ -326,7 +334,7 @@ export default {
       let that = this;
       // 如果用户没登录，则弹出提示不能点赞
       if (liketor == null || liketor == "") {
-        this.warningContent="登录后才能点赞哦！"
+        this.warningContent = "登录后才能点赞哦！";
         this.$refs.myModel.click();
         isShowModal();
         return;
@@ -384,7 +392,7 @@ export default {
                 },
                 content: that.commentContent,
                 replyCount: 0,
-                likeCount:0,
+                likeCount: 0,
                 // 获取当前时间戳
                 gmtCreate: Date.parse(new Date())
               };
@@ -481,12 +489,18 @@ export default {
         }
       );
     },
-     // 跳转到编辑页面
-    editor: function(type){
-      if(type==1){
-        this.$router.push({name:'PublishInvitation',params:{"content":this.question}});
-      }else{
-        this.$router.push({name : 'PublishQuestion',params:{"content": this.question}})
+    // 跳转到编辑页面
+    editor: function(type) {
+      if (type == 1) {
+        this.$router.push({
+          name: "PublishInvitation",
+          params: { content: this.question }
+        });
+      } else {
+        this.$router.push({
+          name: "PublishQuestion",
+          params: { content: this.question }
+        });
       }
     }
   },
@@ -617,6 +631,5 @@ a:hover {
   display: inline-block;
   color: royalblue;
   margin: 0 10px 0 10px;
-  
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="body">
     <div class="media" v-for="question in questions" v-bind:key=question.id>
-      <a href="">
+       <router-link :to="{path:`/home/page/article/${question.user.id}`}">
         <img
         :src="question.user.avatar"
         width="45"
@@ -9,7 +9,7 @@
         class="ml-3 mr-3 rounded"
         alt="head portrait"
       />
-      </a>
+       </router-link>
       <div class="media-body">
         <h6 class="mt-0">
           <router-link :to="{path: `/question/${question.id}`,query:{type:'1'}}">
@@ -83,7 +83,6 @@ export default {
         "page": "1",
       },
       function(res) {
-        console.log(res)
         that.questions = res.data.data.page.list;
         that.currentPage=res.data.data.page.currentpage;
         that.lpage=res.data.data.page.lpage;

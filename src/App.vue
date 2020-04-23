@@ -15,11 +15,17 @@
               <span class="logo" style="margin-top:10px ; display:inline-block">交理社区</span>
             </router-link>
             <form class="form-inline my-2 my-lg-0 d-none d-md-block">
-              <input class="form-control" type="search" placeholder="搜索内容....." aria-label="Search" />
-              <button type="button" class="btn btn-secondary search">搜索</button>
+              <input
+                class="form-control"
+                type="search"
+                placeholder="搜索内容....."
+                aria-label="Search"
+                v-model="keyword"
+              />
+              <button type="button" class="btn btn-secondary search" @click="searchAll()">搜索</button>
             </form>
             <ul class="navbar-nav ml-auto" style="margin-right:30px">
-              <li class="nav-item dropdown" v-if="avatar!=null">
+              <li class="nav-item dropdown mr-3" v-if="avatar!=null">
                 <a
                   class="nav-link dropdown-toggle"
                   href="#"
@@ -45,7 +51,7 @@
                   </router-link>
                 </div>
               </li>
-              <li class="nav-item dropdown" @mouseenter="mouseenter()" @mouseleave="mouseleave()">
+              <!-- <li class="nav-item dropdown" @mouseenter="mouseenter()" @mouseleave="mouseleave()">
                 <a href="#">
                   <img src="./assets/icons/bell-fill.svg" alt class="notice" />
                 </a>
@@ -68,12 +74,14 @@
                     </a>
                   </ul>
                 </div>
-              </li>
+              </li>-->
               <li class="nav-item" @mouseenter="mouseenter1()" @mouseleave="mouseleave1()">
                 <div v-if="avatar!=null">
-                  <a href="#">
-                    <img :src="avatar" alt="avatar" class="avatar" />
-                  </a>
+                  <router-link :to="{path:`/home/page/article/${userId}`}">
+                    <a href="javascript:void(0)">
+                      <img :src="avatar" alt="avatar" class="avatar" />
+                    </a>
+                  </router-link>
                   <div
                     class="my-list-group"
                     :style="{ display : isActive1}"
@@ -116,7 +124,7 @@
                         </router-link>
                       </a>
                       <a href="javascript:void(0)" @click="loginOut()">
-                          <li class="list-item a-notice">退出</li>
+                        <li class="list-item a-notice">退出</li>
                       </a>
                     </ul>
                   </div>
@@ -137,14 +145,14 @@
     <div id="left-content" class="container-fluid">
       <div class="row">
         <div id="content" class="col-sm-12 col-md-12 col-lg-10 mx-auto">
-          <router-view></router-view>
+          <router-view :contents="contents" :keyword="keyword"></router-view>
         </div>
       </div>
     </div>
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
-          <Footer class="footer1" style="margin-top:50px"></Footer>
+          <Footer></Footer>
         </div>
       </div>
     </div>
@@ -161,6 +169,8 @@ import Login from "./components/Login";
 import Footer from "./components/Footer";
 import Register from "./components/Register";
 import UserCenter from "./components/UserCenter";
+import SearchContent from "./components/SearchContent";
+import axios from "axios";
 export default {
   name: "App",
   data() {
@@ -171,7 +181,9 @@ export default {
       avatar: null, //要显示的头像
       login: "登录/注册",
       isActive: "", // 用于是否显示通知下的组件
-      isActive1: "" // 用于是否显示头像下的组件
+      isActive1: "", // 用于是否显示头像下的组件
+      keyword: "", //搜索关键字
+      contents: "" // 搜索到的内容
     };
   },
   components: {
@@ -179,7 +191,8 @@ export default {
     Footer,
     Login,
     Register,
-    UserCenter
+    UserCenter,
+    SearchContent
   },
   beforeCreate: function() {
     this.nickname = sessionStorage.getItem("nickName");
@@ -216,6 +229,27 @@ export default {
           }
         }
       );
+    },
+    // 点击搜索
+    searchAll: function() {
+      let that = this;
+      axios
+        .get("http://localhost:9001/search/all", {
+          params: {
+            keyword: this.keyword
+          }
+        })
+        .then(response => {
+          that.contents = response.data.data;
+          if (this.$route.path != "/search") {
+            this.$router
+              .push({
+                name: "SearchContent",
+                params: { contents: that.contents }
+              })
+              .catch(error => {});
+          }
+        });
     }
   },
   created: function() {
@@ -225,7 +259,6 @@ export default {
     if (jiaoliToken != null) {
       // 自动登录，登录成功后将用户信息(用户ID，头像地址，昵称)存储到sessionStorage中,而且每次登录之后都要刷新所有token
       this.$requestApi.get("autoLogin", "", function(response) {
-        console.log(response);
         if (response.data.flag == true) {
           that.nickname = response.data.data["nickname"];
           that.avatar = response.data.data["avatar"];
@@ -277,7 +310,7 @@ export default {
 #left-content {
   min-width: 100%;
   margin-top: 80px;
-  padding-bottom: 100px;
+  padding-bottom: 50px;
 }
 .logo {
   color: #777;
@@ -338,9 +371,5 @@ body {
 }
 a {
   text-decoration-line: none;
-}
-.footer1 {
-  height: 100px;
-  margin-top: -100px;
 }
 </style>

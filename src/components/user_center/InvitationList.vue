@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid main">
+  <div class="container-fluid main" style="min-height: 590px;">
     <div class="row">
       <div class="col-lg-12 col-md-12 col-sm-12">
         <!-- 顶部标题 -->

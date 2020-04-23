@@ -16,6 +16,9 @@ import VueCookies from 'vue-cookies'
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 
+import Blank from './components/Blank'
+import IndexRightCommon from './components/IndexRightCommon'
+
 // 使用
 Vue.use(mavonEditor)
 Vue.use(VueCookies)
@@ -31,6 +34,8 @@ Vue.prototype.$comjs=Comjs
  * 这种是全局注册
  */
 Vue.component('IndexCommon',IndexCommon)
+Vue.component('Blank',Blank)
+Vue.component('IndexRightCommon',IndexRightCommon)
 
 
 /* eslint-disable no-new */

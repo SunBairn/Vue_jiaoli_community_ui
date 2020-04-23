@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid main">
+  <div class="container-fluid main" style="min-height: 590px;">
     <div class="row">
       <div class="col-lg-12 col-md-12 col-sm-12">
         <!-- 顶部标题 -->
@@ -12,7 +12,9 @@
           <div class="media-body mt-4 info">
             <div class="id_card" style="display:inline-block">
               <span class="id_name">ID:&nbsp;&nbsp;{{user.nickname}}</span>
-              <a href class="user_home" style="float:right">个人主页></a>
+              <router-link :to="{path:`/home/page/article/${userId}`}">
+                <a href="javascript:void(0)" class="user_home" style="float:right">个人主页></a>
+              </router-link>
             </div>
             <div>
               <span style="margin-right:30px">
